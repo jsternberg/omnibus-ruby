@@ -20,9 +20,9 @@ require 'omnibus/exceptions'
 require 'json'
 
 module Omnibus
-
   # Global configuration object for Omnibus runs.
   #
+
   # @todo Write a {http://yardoc.org/guides/extending-yard/writing-handlers.html
   #   Yard handler} for Mixlib::Config-style DSL methods.  I'd like
   #   the default value to show up in the docs without having to type
@@ -186,6 +186,21 @@ module Omnibus
     #   @return [String, nil]
     solaris_compiler nil
 
+    # @!attribute [rw] prebuilt_dep_manifest
+    #   Set to the path of a manifest that lists pre-built
+    #   dependenices that will have already been installed
+    #   in your build envirnonment.
+    #
+    #   @return [String, nil]
+    prebuilt_dep_manifest nil
+
+    # @!attribute [rw]
+    #   Set to true if you're feeling brave and wish to bypass
+    #   the critical library health checks that omnibus performs
+    #   before green-lighting a build for packaging.
+    #
+    #   @return [Boolean]
+    skip_health_check nil
     # @!endgroup
 
     # @!group Build Version Parameters

@@ -63,7 +63,6 @@ module Omnibus
       @homepage = nil
       @description = nil
       @replaces = nil
-
       @exclusions = Array.new
       @conflicts = Array.new
       @dependencies = Array.new
@@ -481,8 +480,8 @@ module Omnibus
     # The command to generate an MSI package on Windows platforms.
     #
     # Does not execute the command, only assembles it.
-    #
     # @return [Array<(String, Hash)>] The complete MSI command, plus a
+    #
     #   Hash of options to be passed on to Mixlib::ShellOut
     #
     # @see Mixlib::ShellOut
@@ -727,9 +726,24 @@ PSTAMP=#{`hostname`.chomp + Time.now.utc.iso8601}
         namespace @name do
 
           package_types.each do |pkg_type|
-            dep_tasks = @dependencies.map {|dep| "software:#{dep}"}
+            deps = @dependencies.dup
+            # Do not generate software tasks for any
+            # component that is supplied as an external/prebuilt
+            # dependency.
+            if config.prebuilt_dep_manifest
+              ready = false
+              File.open(config.prebuilt_dep_manifest).each_line do |line|
+                ready = true if line.index("-----") == 0
+                continue unless ready
+                component = line.split(' ').first
+                continue if component.nil? or component.length == 0
+                deps.delete(component)
+              end
+            end
+
+            dep_tasks = deps.map {|dep| "software:#{dep}"}
             dep_tasks << config.package_dir
-            dep_tasks << "health_check"
+            dep_tasks << "health_check" unless config.unhealthy
 
             desc "package #{@name} into a #{pkg_type}"
             task pkg_type => dep_tasks do
