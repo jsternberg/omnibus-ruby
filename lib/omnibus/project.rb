@@ -59,6 +59,8 @@ module Omnibus
       @output_package = nil
       @name = nil
       @package_name = nil
+      @user = nil
+      @group = nil
       @install_path = nil
       @homepage = nil
       @description = nil
@@ -108,6 +110,26 @@ module Omnibus
     def package_name(val=NULL_ARG)
       @package_name = val unless val.equal?(NULL_ARG)
       @package_name.nil? ? @name : @package_name
+    end
+
+    # Set or retrieve the user of the project.  Unless
+    # explicitly set, the user defaults to nil (root)
+    #
+    # @param val [String] the user to set
+    # @return [String]
+    def user(val=NULL_ARG)
+      @user = val unless val.equal?(NULL_ARG)
+      @user
+    end
+
+    # Set or retrieve the group of the project.  Unless
+    # explicitly set, the group defaults to the user
+    #
+    # @param val [String] the group to set
+    # @return [String]
+    def group(val=NULL_ARG)
+      @group = val unless val.equal?(NULL_ARG)
+      @group.nil? ? @user : @group
     end
 
     # Set or retrieve the path at which the project should be
@@ -536,6 +558,11 @@ module Omnibus
                           "-m '#{maintainer}'",
                           "--description '#{description}'",
                           "--url #{homepage}"]
+      if user
+        command_and_opts << "--#{pkg_type}-user #{user}"
+        command_and_opts << "--#{pkg_type}-group #{group}"
+      end
+
       if File.exist?(File.join(package_scripts_path, "preinst"))
         command_and_opts << "--before-install '#{File.join(package_scripts_path, "preinst")}'"
       end
